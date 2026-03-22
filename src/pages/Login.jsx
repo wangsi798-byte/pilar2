@@ -29,7 +29,7 @@ export default function Login() {
 
     setLoading(true)
     await new Promise(r => setTimeout(r, 900))
-    const result = login(form.username.trim(), form.password)
+    const result = await login(form.username.trim(), form.password)
     setLoading(false)
 
     if (result.ok) navigate('/dashboard', { replace: true })
