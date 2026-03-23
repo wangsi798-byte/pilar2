@@ -9,7 +9,7 @@ const EMPTY = { nama:'', alamat:'', telepon:'', bergabung:new Date().toISOString
 
 export default function Anggota() {
   const { anggota, loading, fetchAnggota, addAnggota, updateAnggota, deleteAnggota } = useDataStore()
-  const [q,setQ]=[useState(''),v=>setQ(v)]
+  const [q, setQ] = useState('')
   const [modal,setModal]  = useState(null)
   const [editing,setEditing] = useState(null)
   const [form,setForm]    = useState(EMPTY)

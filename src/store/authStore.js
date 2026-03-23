@@ -1,10 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-const USERS = [
-  { username: 'admin',    password: 'pilar2025', role: 'Admin',    nama: 'Administrator' },
-  { username: 'operator', password: 'op1234',    role: 'Operator', nama: 'Operator' },
-]
+import { api }     from '../utils/api'
 
 export const useAuthStore = create(
   persist(
@@ -14,22 +10,13 @@ export const useAuthStore = create(
       token: null,
 
       async login(username, password) {
-        // Simulasi network delay
-        await new Promise(r => setTimeout(r, 800))
-
-        const found = USERS.find(u => u.username === username && u.password === password)
-
-        if (found) {
-          const { password: _, ...user } = found
-          set({
-            isAuthenticated: true,
-            user,
-            token: 'mock-jwt-token-' + Math.random().toString(36).substring(7)
-          })
+        try {
+          const res = await api.post('/auth/login', { username, password })
+          set({ isAuthenticated: true, user: res.user, token: res.token })
           return { ok: true }
+        } catch (err) {
+          return { ok: false, message: err.message }
         }
-
-        return { ok: false, message: 'Username atau password salah.' }
       },
 
       logout() {
