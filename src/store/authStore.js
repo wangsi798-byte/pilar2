@@ -19,8 +19,15 @@ export const useAuthStore = create(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
           })
-          const data = await res.json()
-          console.log('Login response:', data)
+          
+          const text = await res.text()
+          console.log('Login response status:', res.status, 'text:', text)
+          
+          if (!text) {
+            return { ok: false, message: 'Server tidak merespons' }
+          }
+          
+          const data = JSON.parse(text)
           
           if (!res.ok) {
             return { ok: false, message: data.message || 'Login failed' }
