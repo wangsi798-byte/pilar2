@@ -1,6 +1,6 @@
 // Thin fetch wrapper — tidak butuh axios, tetap ringan
 
-const BASE = import.meta.env.VITE_API_URL ?? 'https://pilar-api-cye9.vercel.app/api'
+const BASE = ''
 
 function getToken() {
   try {
