@@ -15,6 +15,8 @@ export default function NabungBebas() {
     clearError
   } = useDataStore()
 
+  console.log('Rendering NabungBebas:', { anggota: anggota.length, tabunganBebas: tabunganBebas.length, loading })
+
   const [q, setQ] = useState('')
   const [modal, setModal] = useState(null)
   const [editing, setEditing] = useState(null)
@@ -23,6 +25,7 @@ export default function NabungBebas() {
   const [formError, setFormError] = useState('')
 
   useEffect(() => { 
+    console.log('useEffect called')
     fetchAnggota() 
     fetchTabunganBebas() 
   }, [])
