@@ -67,15 +67,27 @@ function getLocal(key, fallback) {
   return fallback
 }
 
-function setLocal(key, data) {
-  localStorage.setItem(key, JSON.stringify(data))
+// Initialize localStorage with mock data if empty
+function initLocalStorage() {
+  if (!localStorage.getItem('pilar-anggota')) {
+    setLocal('pilar-anggota', MOCK_ANGGOTA)
+  }
+  if (!localStorage.getItem('pilar-paket')) {
+    setLocal('pilar-paket', MOCK_PAKET)
+  }
+  if (!localStorage.getItem('pilar-tabungan-bebas')) {
+    setLocal('pilar-tabungan-bebas', MOCK_TABUNGAN)
+  }
 }
 
+// Call init on load
+initLocalStorage()
+
 export const useDataStore = create((set, get) => ({
-  anggota:    [],
-  paket:      [],
+  anggota:    getLocal('pilar-anggota', MOCK_ANGGOTA),
+  paket:      getLocal('pilar-paket', MOCK_PAKET),
   pembayaran: [],
-  tabunganBebas: [],
+  tabunganBebas: getLocal('pilar-tabungan-bebas', MOCK_TABUNGAN),
   loading:    false,
 
   // ── ANGGOTA ──────────────────────────────────
@@ -156,6 +168,27 @@ export const useDataStore = create((set, get) => ({
     try {
       await directFetch('DELETE', '/tabungan-bebas/' + id)
     } catch {}
+  },
+
+  async updateTabunganBebas(id, data) {
+    const current = get().tabunganBebas
+    const anggotaList = get().anggota.length > 0 ? get().anggota : MOCK_ANGGOTA
+    const anggotaInfo = anggotaList.find(a => a._id === data.anggota) || { _id: data.anggota, nama: 'Unknown' }
+    
+    const updated = current.map(t => {
+      if (t._id === id) {
+        return { ...t, ...data, anggota: anggotaInfo, updatedAt: new Date().toISOString() }
+      }
+      return t
+    })
+    setLocal('pilar-tabungan-bebas', updated)
+    set({ tabunganBebas: updated })
+    
+    try {
+      await directFetch('PUT', '/tabungan-bebas/' + id, data)
+    } catch {}
+    
+    return updated.find(t => t._id === id)
   },
 
   // ── PEMBAYARAN ───────────────────────────────
