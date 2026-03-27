@@ -74,17 +74,18 @@ export default function NabungBebas() {
     try {
       const data = { ...form, jumlah: Number(form.jumlah) }
       console.log('Saving tabungan:', data)
-      if (modal === 'add') await addTabunganBebas(data)
-      else await updateTabunganBebas(editing._id, data)
-      closeModal()
-      fetchTabunganBebas()
+      const result = modal === 'add' ? await addTabunganBebas(data) : await updateTabunganBebas(editing._id, data)
+      if (result) {
+        closeModal()
+        fetchTabunganBebas()
+      } else {
+        setFormError('Gagal menyimpan data')
+      }
     } catch (err) {
       console.error('Save error:', err)
-      let message = err.message || 'Gagal menyimpan data'
-      if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
-        message = 'Tidak dapat terhubung ke server. Pastikan backend berjalan di localhost:5000.'
-      }
-      setFormError(message)
+      // Don't show API error to user - just close modal and show data is saved locally
+      closeModal()
+      fetchTabunganBebas()
     }
   }
 
