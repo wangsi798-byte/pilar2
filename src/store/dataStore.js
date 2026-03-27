@@ -112,8 +112,17 @@ export const useDataStore = create((set, get) => ({
   _getLocalAnggota() {
     try {
       const raw = localStorage.getItem('pilar-anggota')
-      return raw ? JSON.parse(raw) : []
-    } catch { return [] }
+      if (!raw) {
+        // Initialize with default data
+        get()._initLocalData()
+        const initialized = localStorage.getItem('pilar-anggota')
+        return initialized ? JSON.parse(initialized) : []
+      }
+      return JSON.parse(raw)
+    } catch { 
+      get()._initLocalData()
+      return [] 
+    }
   },
   _setLocalAnggota(data) {
     localStorage.setItem('pilar-anggota', JSON.stringify(data))
@@ -156,8 +165,16 @@ export const useDataStore = create((set, get) => ({
   _getLocalPaket() {
     try {
       const raw = localStorage.getItem('pilar-paket')
-      return raw ? JSON.parse(raw) : []
-    } catch { return [] }
+      if (!raw) {
+        get()._initLocalData()
+        const initialized = localStorage.getItem('pilar-paket')
+        return initialized ? JSON.parse(initialized) : []
+      }
+      return JSON.parse(raw)
+    } catch { 
+      get()._initLocalData()
+      return [] 
+    }
   },
   _setLocalPaket(data) {
     localStorage.setItem('pilar-paket', JSON.stringify(data))
@@ -196,8 +213,16 @@ export const useDataStore = create((set, get) => ({
   _getLocalPembayaran() {
     try {
       const raw = localStorage.getItem('pilar-pembayaran')
-      return raw ? JSON.parse(raw) : []
-    } catch { return [] }
+      if (!raw) {
+        get()._initLocalData()
+        const initialized = localStorage.getItem('pilar-pembayaran')
+        return initialized ? JSON.parse(initialized) : []
+      }
+      return JSON.parse(raw)
+    } catch { 
+      get()._initLocalData()
+      return [] 
+    }
   },
   _setLocalPembayaran(data) {
     localStorage.setItem('pilar-pembayaran', JSON.stringify(data))
@@ -260,8 +285,8 @@ export const useDataStore = create((set, get) => ({
     } catch (err) {
       console.warn('API add failed, saving locally:', err.message)
       // Fallback: always save locally even on API error
-      const anggotaList = get().anggota
-      const anggotaInfo = anggotaList.find(a => a._id === data.anggota) || { _id: data.anggota, nama: 'Local Member' }
+      const anggotaList = get()._getLocalAnggota()
+      const anggotaInfo = anggotaList.find(a => a._id === data.anggota) || { _id: data.anggota, nama: 'Unknown' }
       const localEntry = {
         ...data,
         _id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
