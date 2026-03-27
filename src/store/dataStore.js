@@ -5,6 +5,7 @@ export const useDataStore = create((set, get) => ({
   anggota:    [],
   paket:      [],
   pembayaran: [],
+  tabunganBebas: [],
   rekap:      null,
   loading:    false,
   error:      null,
@@ -93,6 +94,33 @@ export const useDataStore = create((set, get) => ({
   async deletePembayaran(id) {
     await api.delete('/pembayaran/' + id)
     set(s => ({ pembayaran: s.pembayaran.filter(p => p._id !== id) }))
+  },
+
+  // ── TABUNGAN BEBAS ───────────────────────────
+  async fetchTabunganBebas(anggotaId) {
+    set({ loading: true })
+    try {
+      const qs = anggotaId ? `?anggotaId=${anggotaId}` : ''
+      const res = await api.get('/tabungan-bebas' + qs)
+      set({ tabunganBebas: res.data, loading: false })
+    } catch (err) { get()._setErr(err) }
+  },
+
+  async addTabunganBebas(data) {
+    const res = await api.post('/tabungan-bebas', data)
+    set(s => ({ tabunganBebas: [res.data, ...s.tabunganBebas] }))
+    return res.data
+  },
+
+  async updateTabunganBebas(id, data) {
+    const res = await api.put('/tabungan-bebas/' + id, data)
+    set(s => ({ tabunganBebas: s.tabunganBebas.map(t => t._id === id ? res.data : t) }))
+    return res.data
+  },
+
+  async deleteTabunganBebas(id) {
+    await api.delete('/tabungan-bebas/' + id)
+    set(s => ({ tabunganBebas: s.tabunganBebas.filter(t => t._id !== id) }))
   },
 
   // ── REKAP ────────────────────────────────────
