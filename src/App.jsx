@@ -7,6 +7,7 @@ import Anggota    from './pages/Anggota'
 import Paket      from './pages/Paket'
 import Pembayaran from './pages/Pembayaran'
 import Laporan    from './pages/Laporan'
+import NabungBebas from './pages/NabungBebas'
 
 function ProtectedRoute({ children }) {
   const isAuth = useAuthStore(s => s.isAuthenticated)
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="anggota"    element={<Anggota />} />
           <Route path="paket"      element={<Paket />} />
           <Route path="pembayaran" element={<Pembayaran />} />
+          <Route path="nabung-bebas" element={<NabungBebas />} />
           <Route path="laporan"    element={<Laporan />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

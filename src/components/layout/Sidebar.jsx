@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import {
   LayoutDashboard, Users, Gift,
-  CreditCard, FileText, LogOut, X,
+  CreditCard, FileText, LogOut, X, PiggyBank
 } from 'lucide-react'
 
 const NAV = [
@@ -10,6 +10,7 @@ const NAV = [
   { to: '/anggota',    icon: Users,            label: 'Anggota'         },
   { to: '/paket',      icon: Gift,             label: 'Paket Lebaran'   },
   { to: '/pembayaran', icon: CreditCard,       label: 'Pembayaran'      },
+  { to: '/nabung-bebas',icon: PiggyBank,       label: 'Nabung Bebas'    },
   { to: '/laporan',    icon: FileText,         label: 'Laporan'         },
 ]
 
