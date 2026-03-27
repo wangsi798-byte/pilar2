@@ -73,13 +73,18 @@ export default function NabungBebas() {
     }
     try {
       const data = { ...form, jumlah: Number(form.jumlah) }
+      console.log('Saving tabungan:', data)
       if (modal === 'add') await addTabunganBebas(data)
       else await updateTabunganBebas(editing._id, data)
       closeModal()
       fetchTabunganBebas()
     } catch (err) {
-      console.error(err)
-      setFormError(err.message || 'Gagal menyimpan data')
+      console.error('Save error:', err)
+      let message = err.message || 'Gagal menyimpan data'
+      if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+        message = 'Tidak dapat terhubung ke server. Pastikan backend berjalan di localhost:5000.'
+      }
+      setFormError(message)
     }
   }
 
