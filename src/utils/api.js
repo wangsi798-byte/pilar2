@@ -21,12 +21,9 @@ async function request(method, path, body) {
   }
   if (body) options.body = JSON.stringify(body)
 
-  console.log('API Request:', method, BASE + path, options)
-
   const res = await fetch(`${BASE}${path}`, options)
 
   const text = await res.text()
-  console.log('API Response:', res.status, text)
 
   if (!text) {
     const err = new Error('Empty response from server')
@@ -38,7 +35,7 @@ async function request(method, path, body) {
   try {
     data = JSON.parse(text)
   } catch (e) {
-    const err = new Error('Invalid JSON response: ' + text.substring(0, 100))
+    const err = new Error('Invalid JSON response')
     err.status = res.status
     throw err
   }
