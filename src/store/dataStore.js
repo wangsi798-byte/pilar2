@@ -1,6 +1,46 @@
 import { create } from 'zustand'
 import { api }     from '../utils/api'
 
+const DIRECT_API = 'https://pilar-api-cye9.vercel.app/api'
+
+function directFetch(method, path, body) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const raw = localStorage.getItem('pilar-auth')
+      let token = null
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        token = parsed?.state?.token ?? parsed?.token ?? null
+      }
+      
+      const headers = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      
+      const options = { method, headers }
+      if (body) options.body = JSON.stringify(body)
+      
+      const res = await fetch(`${DIRECT_API}${path}`, options)
+      const text = await res.text()
+      
+      if (!text) {
+        reject(new Error('Empty response'))
+        return
+      }
+      
+      const data = JSON.parse(text)
+      
+      if (!res.ok) {
+        reject(new Error(data.message || 'Request failed'))
+        return
+      }
+      
+      resolve(data)
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
 export const useDataStore = create((set, get) => ({
   anggota:    [],
   paket:      [],
@@ -85,8 +125,7 @@ export const useDataStore = create((set, get) => ({
       if (q)      params.append('q', q)
       if (status) params.append('status', status)
       const qs = params.toString()
-      const res = await api.get('/anggota' + (qs ? '?' + qs : ''))
-      const data = res.data || res
+      const data = await directFetch('GET', '/anggota' + (qs ? '?' + qs : ''))
       get()._setLocalAnggota(data)
       set({ anggota: data, loading: false })
     } catch (err) {
@@ -126,8 +165,7 @@ export const useDataStore = create((set, get) => ({
   async fetchPaket() {
     set({ loading: true })
     try {
-      const res = await api.get('/paket')
-      const data = res.data || res
+      const data = await directFetch('GET', '/paket')
       get()._setLocalPaket(data)
       set({ paket: data, loading: false })
     } catch (err) {
@@ -168,8 +206,7 @@ export const useDataStore = create((set, get) => ({
     set({ loading: true })
     try {
       const qs = filters ? '?' + new URLSearchParams(filters).toString() : ''
-      const res = await api.get('/pembayaran' + qs)
-      const data = res.data || res
+      const data = await directFetch('GET', '/pembayaran' + qs)
       get()._setLocalPembayaran(data)
       set({ pembayaran: data, loading: false })
     } catch (err) {
@@ -201,15 +238,12 @@ export const useDataStore = create((set, get) => ({
     set({ loading: true })
     try {
       const qs = anggotaId ? `?anggotaId=${anggotaId}` : ''
-      const res = await api.get('/tabungan-bebas' + qs)
-      const data = res.data || res
-      // API success, update localStorage with fresh data
+      const data = await directFetch('GET', '/tabungan-bebas' + qs)
       get()._setLocalTabunganBebas(data)
       set({ tabunganBebas: data, loading: false })
     } catch (err) {
       console.warn('API fetch failed, using local storage:', err.message)
       try {
-        // Fallback to local storage
         const localData = get()._getLocalTabunganBebas()
         set({ tabunganBebas: localData, loading: false })
       } catch (fallbackErr) {
@@ -222,9 +256,7 @@ export const useDataStore = create((set, get) => ({
   async addTabunganBebas(data) {
     set({ loading: true })
     try {
-      const res = await api.post('/tabungan-bebas', data)
-      const savedData = res.data || res
-      // API success, update localStorage with new item prepended
+      const savedData = await directFetch('POST', '/tabungan-bebas', data)
       const localData = get()._getLocalTabunganBebas()
       get()._setLocalTabunganBebas([savedData, ...localData])
       set(s => ({ tabunganBebas: [savedData, ...s.tabunganBebas], loading: false }))
@@ -232,7 +264,6 @@ export const useDataStore = create((set, get) => ({
     } catch (err) {
       console.warn('API add failed, saving locally:', err.message)
       try {
-        // Fallback: create local entry with temporary ID
         const anggotaList = get().anggota
         const anggotaInfo = anggotaList.find(a => a._id === data.anggota) || { _id: data.anggota, nama: 'Local Member' }
         const localEntry = {
