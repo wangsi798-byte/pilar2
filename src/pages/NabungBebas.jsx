@@ -54,11 +54,16 @@ export default function NabungBebas() {
 
   async function handleSave() {
     if (!form.anggota || !form.jumlah) return
-    const data = { ...form, jumlah: Number(form.jumlah) }
-    if (modal === 'add') await addTabunganBebas(data)
-    else await updateTabunganBebas(editing._id, data)
-    closeModal()
-    fetchTabunganBebas()
+    try {
+      const data = { ...form, jumlah: Number(form.jumlah) }
+      if (modal === 'add') await addTabunganBebas(data)
+      else await updateTabunganBebas(editing._id, data)
+      closeModal()
+      fetchTabunganBebas()
+    } catch (err) {
+      console.error(err)
+      // error is handled by store _setErr and shown in store's error state if UI supports it
+    }
   }
 
   const f = k => ({ 

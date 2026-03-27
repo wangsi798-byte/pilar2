@@ -107,20 +107,29 @@ export const useDataStore = create((set, get) => ({
   },
 
   async addTabunganBebas(data) {
-    const res = await api.post('/tabungan-bebas', data)
-    set(s => ({ tabunganBebas: [res.data, ...s.tabunganBebas] }))
-    return res.data
+    set({ loading: true })
+    try {
+      const res = await api.post('/tabungan-bebas', data)
+      set(s => ({ tabunganBebas: [res.data, ...s.tabunganBebas], loading: false }))
+      return res.data
+    } catch (err) { get()._setErr(err); throw err }
   },
 
   async updateTabunganBebas(id, data) {
-    const res = await api.put('/tabungan-bebas/' + id, data)
-    set(s => ({ tabunganBebas: s.tabunganBebas.map(t => t._id === id ? res.data : t) }))
-    return res.data
+    set({ loading: true })
+    try {
+      const res = await api.put('/tabungan-bebas/' + id, data)
+      set(s => ({ tabunganBebas: s.tabunganBebas.map(t => t._id === id ? res.data : t), loading: false }))
+      return res.data
+    } catch (err) { get()._setErr(err); throw err }
   },
 
   async deleteTabunganBebas(id) {
-    await api.delete('/tabungan-bebas/' + id)
-    set(s => ({ tabunganBebas: s.tabunganBebas.filter(t => t._id !== id) }))
+    set({ loading: true })
+    try {
+      await api.delete('/tabungan-bebas/' + id)
+      set(s => ({ tabunganBebas: s.tabunganBebas.filter(t => t._id !== id), loading: false }))
+    } catch (err) { get()._setErr(err); throw err }
   },
 
   // ── REKAP ────────────────────────────────────
