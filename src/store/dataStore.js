@@ -69,15 +69,20 @@ function getLocal(key, fallback) {
 
 // Initialize localStorage with mock data if empty
 function initLocalStorage() {
+  console.log('Initializing localStorage...')
   if (!localStorage.getItem('pilar-anggota')) {
+    console.log('Setting mock anggota')
     setLocal('pilar-anggota', MOCK_ANGGOTA)
   }
   if (!localStorage.getItem('pilar-paket')) {
+    console.log('Setting mock paket')
     setLocal('pilar-paket', MOCK_PAKET)
   }
   if (!localStorage.getItem('pilar-tabungan-bebas')) {
+    console.log('Setting mock tabungan')
     setLocal('pilar-tabungan-bebas', MOCK_TABUNGAN)
   }
+  console.log('localStorage initialized')
 }
 
 // Call init on load
@@ -95,8 +100,14 @@ export const useDataStore = create((set, get) => ({
     set({ loading: true })
     try {
       const data = await directFetch('GET', '/anggota')
-      setLocal('pilar-anggota', data)
-      set({ anggota: data, loading: false })
+      if (data && data.length > 0) {
+        setLocal('pilar-anggota', data)
+        set({ anggota: data, loading: false })
+      } else {
+        const local = getLocal('pilar-anggota', MOCK_ANGGOTA)
+        setLocal('pilar-anggota', local)
+        set({ anggota: local, loading: false })
+      }
     } catch (err) {
       console.warn('Using local anggota:', err.message)
       const local = getLocal('pilar-anggota', MOCK_ANGGOTA)
@@ -110,8 +121,14 @@ export const useDataStore = create((set, get) => ({
     set({ loading: true })
     try {
       const data = await directFetch('GET', '/paket')
-      setLocal('pilar-paket', data)
-      set({ paket: data, loading: false })
+      if (data && data.length > 0) {
+        setLocal('pilar-paket', data)
+        set({ paket: data, loading: false })
+      } else {
+        const local = getLocal('pilar-paket', MOCK_PAKET)
+        setLocal('pilar-paket', local)
+        set({ paket: local, loading: false })
+      }
     } catch (err) {
       console.warn('Using local paket:', err.message)
       const local = getLocal('pilar-paket', MOCK_PAKET)
@@ -125,8 +142,14 @@ export const useDataStore = create((set, get) => ({
     set({ loading: true })
     try {
       const data = await directFetch('GET', '/tabungan-bebas')
-      setLocal('pilar-tabungan-bebas', data)
-      set({ tabunganBebas: data, loading: false })
+      if (data && data.length > 0) {
+        setLocal('pilar-tabungan-bebas', data)
+        set({ tabunganBebas: data, loading: false })
+      } else {
+        const local = getLocal('pilar-tabungan-bebas', MOCK_TABUNGAN)
+        setLocal('pilar-tabungan-bebas', local)
+        set({ tabunganBebas: local, loading: false })
+      }
     } catch (err) {
       console.warn('Using local tabungan:', err.message)
       const local = getLocal('pilar-tabungan-bebas', MOCK_TABUNGAN)
