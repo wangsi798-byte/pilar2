@@ -243,13 +243,9 @@ export const useDataStore = create((set, get) => ({
       set({ tabunganBebas: data, loading: false })
     } catch (err) {
       console.warn('API fetch failed, using local storage:', err.message)
-      try {
-        const localData = get()._getLocalTabunganBebas()
-        set({ tabunganBebas: localData, loading: false })
-      } catch (fallbackErr) {
-        console.error('Fallback also failed:', fallbackErr)
-        set({ tabunganBebas: [], loading: false })
-      }
+      // Always fallback to local storage on error
+      const localData = get()._getLocalTabunganBebas()
+      set({ tabunganBebas: localData, loading: false })
     }
   },
 
@@ -263,25 +259,21 @@ export const useDataStore = create((set, get) => ({
       return savedData
     } catch (err) {
       console.warn('API add failed, saving locally:', err.message)
-      try {
-        const anggotaList = get().anggota
-        const anggotaInfo = anggotaList.find(a => a._id === data.anggota) || { _id: data.anggota, nama: 'Local Member' }
-        const localEntry = {
-          ...data,
-          _id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          anggota: anggotaInfo
-        }
-        const localData = get()._getLocalTabunganBebas()
-        get()._setLocalTabunganBebas([localEntry, ...localData])
-        set(s => ({ tabunganBebas: [localEntry, ...s.tabunganBebas], loading: false }))
-        return localEntry
-      } catch (fallbackErr) {
-        console.error('Fallback also failed:', fallbackErr)
-        set({ loading: false })
-        return null
+      // Fallback: always save locally even on API error
+      const anggotaList = get().anggota
+      const anggotaInfo = anggotaList.find(a => a._id === data.anggota) || { _id: data.anggota, nama: 'Local Member' }
+      const localEntry = {
+        ...data,
+        _id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        anggota: anggotaInfo
       }
+      const localData = get()._getLocalTabunganBebas()
+      get()._setLocalTabunganBebas([localEntry, ...localData])
+      set(s => ({ tabunganBebas: [localEntry, ...s.tabunganBebas], loading: false }))
+      console.log('Saved locally:', localEntry)
+      return localEntry // Return success even if API failed
     }
   },
 
