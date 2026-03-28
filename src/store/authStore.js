@@ -11,13 +11,18 @@ export const useAuthStore = create(
       token: null,
 
       async login(username, password) {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 15000)
+
         try {
           const res = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password }),
+            signal: controller.signal
           })
 
+          clearTimeout(timeoutId)
           const text = await res.text()
 
           if (!res.ok) {
@@ -29,16 +34,23 @@ export const useAuthStore = create(
             return { ok: false, message }
           }
 
-          if (!text) {
-            return { ok: false, message: 'Server tidak merespons' }
-          }
-
           const data = JSON.parse(text)
           set({ isAuthenticated: true, user: data.user, token: data.token })
           return { ok: true }
         } catch (err) {
+          clearTimeout(timeoutId)
           console.error('Login error:', err)
-          return { ok: false, message: 'Gagal terhubung ke server: ' + err.message }
+          
+          let message = 'Gagal terhubung ke server'
+          if (err.name === 'AbortError') {
+            message = 'Server terlalu lama merespons. Silakan coba lagi.'
+          } else if (err.message.includes('Failed to fetch')) {
+            message = 'Koneksi internet bermasalah atau server sedang down.'
+          } else {
+            message += ': ' + err.message
+          }
+          
+          return { ok: false, message }
         }
       },
 
