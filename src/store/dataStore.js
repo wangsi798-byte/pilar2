@@ -67,6 +67,14 @@ function getLocal(key, fallback) {
   return fallback
 }
 
+function setLocal(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (err) {
+    console.error('Error saving to localStorage:', err)
+  }
+}
+
 // Initialize localStorage with mock data if empty
 function initLocalStorage() {
   console.log('Initializing localStorage...')
