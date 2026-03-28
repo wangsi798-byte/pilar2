@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { api }     from '../utils/api'
 
-const DIRECT_API = '' // Use relative URL for Vercel proxy
+const API_BASE = 'https://pilar-api-cye9.vercel.app/api'
 
 export const useAuthStore = create(
   persist(
@@ -13,26 +12,27 @@ export const useAuthStore = create(
 
       async login(username, password) {
         try {
-          console.log('Login attempt to:', DIRECT_API + '/auth/login')
-          const res = await fetch(`${DIRECT_API}/auth/login`, {
+          const res = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
           })
-          console.log('Response status:', res.status)
-          console.log('Response headers:', [...res.headers.entries()])
-          
+
           const text = await res.text()
-          console.log('Response text:', text || '(empty)')
-          
+
           if (!res.ok) {
-            return { ok: false, message: 'Username atau password salah' }
+            let message = 'Username atau password salah'
+            try {
+              const errData = JSON.parse(text)
+              if (errData.message) message = errData.message
+            } catch {}
+            return { ok: false, message }
           }
-          
+
           if (!text) {
             return { ok: false, message: 'Server tidak merespons' }
           }
-          
+
           const data = JSON.parse(text)
           set({ isAuthenticated: true, user: data.user, token: data.token })
           return { ok: true }
